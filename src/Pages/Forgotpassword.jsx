@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 
 const Forgotpassword = () => {
     const [email, setEmail] = useState("");
-    const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
@@ -13,26 +12,19 @@ const Forgotpassword = () => {
         setLoading(true);
         try {
             const response = await axios.post("http://127.0.0.1:5000/forgot-password", {
-                email
+                email: email
             });
 
             if (response.status === 200) {
-                setMessage(response.data.message);
-                // Redirect to reset password page with the reset token
-                if (response.data.resetToken) {
-                    // Pass the token to the reset page
-                    navigate(`/reset-password?token=${response.data.resetToken}`);
-                }
-            } else {
-                setMessage(response.data.message || "Something went wrong.");
-            }
+                console.log("user: ", response.data);
+                localStorage.setItem("id", response.data._id);
+               alert(response.data.message);
+            } 
         } catch (error) {
-            setMessage("An error occurred. Please try again later.");
-        } finally {
-            setLoading(false);
+            console.error('Login error:', error);
+            alert("An error occurred while logging in.");
         }
     };
-
     return (
         <div className="max-w-sm mx-auto mt-10">
             <h1 className="text-2xl font-bold text-center mb-5">Forgot Password</h1>
@@ -52,8 +44,8 @@ const Forgotpassword = () => {
                         required
                     />
                 </div>
-
                 <button
+                  onClick={() => navigate("/resetpassword")}
                     type="submit"
                     disabled={loading}
                     className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
@@ -61,13 +53,6 @@ const Forgotpassword = () => {
                     {loading ? "Sending..." : "Send Reset Link"}
                 </button>
             </form>
-
-            {message && (
-                <div className={`mt-4 text-center ${message.includes("error") ? 'text-red-600' : 'text-green-600'}`}>
-                    {message}
-                </div>
-            )}
-
             {/* Back to login link */}
             <div className="mt-4 text-center">
                 <button
