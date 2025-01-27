@@ -29,8 +29,6 @@ export const Login = () => {
     };
 
     const handleForgotPassword = () => {
-        // Navigate to a password reset page or show a modal for password recovery
-        alert("Redirecting to forgot password page...");
         navigate("/forgotpassword"); // Redirect to the forgot password page
     };
 

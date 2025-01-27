@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const ResetPassword = () => {
+    const {token} = useParams();
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
@@ -11,9 +12,10 @@ const ResetPassword = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            const response = await axios.put("http://127.0.0.1:5000/reset-password", {
+            const response = await axios.put(`http://127.0.0.1:5000/reset-password/${token}`, {
                 _id: localStorage.getItem("id"),
                 password: password,
+                token: token
             });
             if (response.status === 200) {
                 console.log(response.data)
