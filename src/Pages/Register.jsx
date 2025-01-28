@@ -4,60 +4,58 @@ import { useNavigate } from 'react-router-dom';
 import { Formik, Field, Form, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 
-export const Login = () => {
+export const Register = () => {
   const [loading, setLoading] = useState(false); // Loading state for API call
   const [error, setError] = useState(null); // Error state for API errors
   const navigate = useNavigate();
 
   // Validation Schema using Yup
   const validationSchema = Yup.object({
+    name: Yup.string()
+      .min(3, 'Name must be at least 3 characters')
+      .required('Name is required'),
     email: Yup.string()
-      .email("Invalid email address")
-      .required("Email is required"),
+      .email('Invalid email address')
+      .required('Email is required'),
+    age: Yup.number()
+      .positive('Age must be a positive number')
+      .integer('Age must be an integer')
+      .required('Age is required'),
     password: Yup.string()
-      .min(6, "Password must be at least 6 characters")
-      .required("Password is required"),
+      .min(6, 'Password must be at least 6 characters')
+      .required('Password is required'),
   });
 
   // Handle form submission
-  const handleLogin = async (values) => {
+  const handleRegister = async (values) => {
     setLoading(true); // Start loading
     setError(null); // Reset error state
 
     try {
-      const response = await axios.post("http://127.0.0.1:5000/login", {
+      const response = await axios.post('http://localhost:5000/user', {
+        name: values.name,
         email: values.email,
+        age: values.age,
         password: values.password,
       });
 
       if (response.status === 200) {
-        localStorage.setItem("token", response.data.token); // Save token to localStorage
-        alert(response.data.message); // Show success message
-        navigate("/home"); // Redirect to home page
+        alert('User registered successfully!');
+        navigate('/login'); // Redirect to login page after successful registration
       }
     } catch (error) {
-      console.error('Login error:', error);
-      setError(error.response?.data?.message || "An error occurred while logging in."); // Set error message
+      console.error('Registration error:', error);
+      setError(error.response?.data?.message || 'An error occurred during registration.');
     } finally {
       setLoading(false); // Stop loading
     }
-  };
-
-  // Handle forgot password navigation
-  const handleForgotPassword = () => {
-    navigate("/forgotpassword");
-  };
-
-  // Handle register navigation
-  const handleRegister = () => {
-    navigate("/register");
   };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
       <div className="w-full max-w-sm p-6 bg-white rounded-lg shadow dark:bg-gray-800">
         <h1 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-6">
-          Login
+          Register
         </h1>
 
         {/* Display error message if any */}
@@ -68,12 +66,26 @@ export const Login = () => {
         )}
 
         <Formik
-          initialValues={{ email: '', password: '' }}
+          initialValues={{ name: '', email: '', age: '', password: '' }}
           validationSchema={validationSchema}
-          onSubmit={handleLogin}
+          onSubmit={handleRegister}
         >
           {({ isSubmitting }) => (
             <Form>
+              {/* Name Field */}
+              <div className="mb-4">
+                <label htmlFor="name" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                  Name
+                </label>
+                <Field
+                  type="text"
+                  name="name"
+                  className="w-full p-2.5 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  placeholder="John Doe"
+                />
+                <ErrorMessage name="name" component="div" className="text-sm text-red-600 mt-1" />
+              </div>
+
               {/* Email Field */}
               <div className="mb-4">
                 <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
@@ -86,6 +98,20 @@ export const Login = () => {
                   placeholder="name@example.com"
                 />
                 <ErrorMessage name="email" component="div" className="text-sm text-red-600 mt-1" />
+              </div>
+
+              {/* Age Field */}
+              <div className="mb-4">
+                <label htmlFor="age" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                  Age
+                </label>
+                <Field
+                  type="number"
+                  name="age"
+                  className="w-full p-2.5 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  placeholder="25"
+                />
+                <ErrorMessage name="age" component="div" className="text-sm text-red-600 mt-1" />
               </div>
 
               {/* Password Field */}
@@ -108,34 +134,27 @@ export const Login = () => {
                 disabled={loading || isSubmitting}
                 className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 mb-4"
               >
-                {loading ? 'Logging in...' : 'Login'}
-              </button>
-
-              {/* Register Button */}
-              <button
-                type="button"
-                onClick={handleRegister}
-                disabled={loading}
-                className="w-full text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800 mb-4"
-              >
-                Register
+                {loading ? 'Registering...' : 'Register'}
               </button>
             </Form>
           )}
         </Formik>
 
-        {/* Forgot Password Link */}
+        {/* Link to Login Page */}
         <div className="mt-4 text-center">
-          <button
-            onClick={handleForgotPassword}
-            className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-500 transition duration-200"
-          >
-            Forgot password?
-          </button>
+          <p className="text-gray-600 dark:text-gray-400">
+            Already have an account?{' '}
+            <button
+              onClick={() => navigate('/login')}
+              className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-500 transition duration-200"
+            >
+              Login here
+            </button>
+          </p>
         </div>
       </div>
     </div>
   );
 };
 
-export default Login;
+export default Register;
