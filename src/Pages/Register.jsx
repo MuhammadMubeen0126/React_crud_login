@@ -38,14 +38,15 @@ export const Register = () => {
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
       const decoded = jwtDecode(credentialResponse.credential);
-      const { name, email } = decoded;
+
 
       // Send the Google user data to your backend
-      const response = await axios.post('http://localhost:5000/auth/google', { name, email });
+      const response = await axios.post('http://localhost:5000/auth/google', decoded);
 
       if (response.status === 200) {
-        alert('Google login successful!');
-        navigate('/home'); // Redirect to dashboard after login
+        console.log(response.data)
+        // alert('Google login successful!');
+        // navigate('/home'); // Redirect to dashboard after login
       }
     } catch (error) {
       console.error('Google Login Error:', error);
