@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Formik, Field, Form, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
+import { jwtDecode } from "jwt-decode";
 
 export const Login = () => {
   const [loading, setLoading] = useState(false); // Loading state for API call
@@ -32,7 +34,7 @@ export const Login = () => {
 
       if (response.status === 200) {
         localStorage.setItem("token", response.data.token); // Save token to localStorage
-        alert(response.data.message); // Show success message
+        
         navigate("/home"); // Redirect to home page
       }
     } catch (error) {
@@ -53,7 +55,28 @@ export const Login = () => {
     navigate("/register");
   };
 
+  
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      const decoded = jwtDecode(credentialResponse.credential);
+  
+      // Send the Google user data to your backend
+      const response = await axios.post('http://localhost:5000/auth/google', decoded);
+  
+      if (response.status === 200) {
+        localStorage.setItem("token", response.data.token); // Save token to localStorage
+        console.log(response.data);
+        navigate('/home'); // Redirect to home after successful login
+      }
+    } catch (error) {
+      console.error('Google Login Error:', error);
+      setError('Google authentication failed.');
+    }
+  };
+  
+
   return (
+     <GoogleOAuthProvider clientId="81974192213-qkgt5odhp6f2k592u87himhja2ci49q4.apps.googleusercontent.com">
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
       <div className="w-full max-w-sm p-6 bg-white rounded-lg shadow dark:bg-gray-800">
         <h1 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-6">
@@ -120,6 +143,9 @@ export const Login = () => {
               >
                 Register
               </button>
+
+              {/* Google Login Button */}
+              <GoogleLogin onSuccess={handleGoogleSuccess} onError={() => setError('Google authentication failed.')} />
             </Form>
           )}
         </Formik>
@@ -135,6 +161,7 @@ export const Login = () => {
         </div>
       </div>
     </div>
+    </GoogleOAuthProvider>
   );
 };
 
